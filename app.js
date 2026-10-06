@@ -35,6 +35,9 @@
     endEfficiency: document.getElementById("endEfficiency"),
     summary: document.getElementById("summary"),
     restartBtn: document.getElementById("restartBtn"),
+    onboardingOverlay: document.getElementById("onboardingOverlay"),
+    startShiftBtn: document.getElementById("startShiftBtn"),
+    goalPrompt: document.getElementById("goalPrompt"),
 
     bottleneckName: document.getElementById("bottleneckName"),
     walkBar: document.getElementById("walkBar"),
@@ -236,7 +239,11 @@
     officePulse:0,
     soulId:0,
     placementPending:false,
-    lastBottleneckSnapshot:null
+    lastBottleneckSnapshot:null,
+    tutorialStep:0,
+    shiftStarted:false,
+    firstAutomationAnnounced:false,
+    firstRolePromptShown:false
   };
 
   const stations = {
@@ -250,7 +257,7 @@
   };
 
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-  function elapsed(){ return (performance.now()-state.startedAt)/1000; }
+  function elapsed(){ return state.shiftStarted ? (performance.now()-state.startedAt)/1000 : 0; }
   function formatTime(s){
     s=Math.max(0,Math.floor(s));
     return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
@@ -258,6 +265,41 @@
 
   function effectivePassive(){
     return state.passiveRate * state.roleBonus * state.layoutBonus;
+  }
+
+
+  function setGoal(text){
+    if(els.goalPrompt) els.goalPrompt.textContent = text;
+  }
+
+  function tutorial(step){
+    if(step <= state.tutorialStep) return;
+    state.tutorialStep = step;
+
+    if(step === 1){
+      setGoal("NEXT GOAL: Reach 25 Authority for your first office upgrade.");
+      els.processBtn.classList.remove("guided-pulse");
+    }
+
+    if(step === 2){
+      setGoal("UPGRADE READY: choose how to improve the office.");
+      els.buyBtn.closest(".paper")?.classList.add("manage-highlight");
+    }
+
+    if(step === 3){
+      setGoal("AUTOMATION UNLOCKED: clicking is now optional. Manage and optimise the office.");
+      els.processBtn.classList.remove("guided-pulse");
+      els.processBtn.innerHTML = `HELP PROCESS A SOUL<br><small>Optional · +${state.manualValue} Authority</small>`;
+      els.dutyTitle.textContent = "Manage the office";
+      els.dutyText.textContent = "Watch the workflow, buy improvements and reduce bottlenecks. Manual processing is now optional.";
+      els.automationNote.classList.remove("hidden");
+      els.automationNote.textContent = "AUTOMATION ACTIVE — clicking is optional. Managing the office is now the main job.";
+    }
+
+    if(step === 4){
+      setGoal("MANAGEMENT TASK: improve the biggest bottleneck using clerk roles or placement.");
+      document.getElementById("workflowCard")?.classList.add("manage-highlight");
+    }
   }
 
   function currentMilestone(){
@@ -525,6 +567,7 @@
     }
 
     els.workerRoles.classList.remove("hidden");
+    if(!state.firstRolePromptShown){ state.firstRolePromptShown=true; setTimeout(()=>tutorial(4),350); }
     els.workerRoleRows.innerHTML = "";
 
     state.workers.forEach(worker => {
@@ -625,8 +668,11 @@
 
     if(effectivePassive() > 0){
       els.automationNote.classList.remove("hidden");
-      els.dutyTitle.textContent = "Supervise the growing operation";
-      els.dutyText.textContent = "The office is processing souls automatically. Keep clicking when you want to accelerate the next upgrade.";
+      if(state.tutorialStep >= 3){
+        els.dutyTitle.textContent = "Manage the office";
+        els.dutyText.textContent = "The office is processing souls automatically. Watch the workflow, reduce bottlenecks and buy improvements. Manual processing is optional.";
+        els.processBtn.innerHTML = `HELP PROCESS A SOUL<br><small>Optional · +${state.manualValue} Authority</small>`;
+      }
     }
 
     if(state.milestoneIndex >= 1) els.phaseLabel.textContent = "THE OFFICE IS BEGINNING TO FUNCTION. THIS IS NOT YET CAUSE FOR ALARM.";
@@ -638,6 +684,8 @@
     renderPlacementInfo();
 
     if(!next) return;
+
+    if(state.tutorialStep === 1 && state.milestoneIndex === 0 && state.authority >= next.cost) tutorial(2);
 
     els.nextName.textContent = next.name;
     els.nextDescription.textContent = next.description;
@@ -705,6 +753,7 @@
     showBanner(`${option.name} AUTHORISED`);
     els.notice.textContent = option.description;
     addPop(520,110,`OFFICE EFFICIENCY x${(efficiency()/100).toFixed(1)}`,true);
+    if(!state.firstAutomationAnnounced && effectivePassive() > 0){ state.firstAutomationAnnounced=true; tutorial(3); }
     updateUI();
   }
 
@@ -738,6 +787,7 @@
 
     if(next.id === "printer"){
       els.notice.textContent = "The printer coughs into life. Nobody remembers ordering toner.";
+      if(!state.firstAutomationAnnounced){ state.firstAutomationAnnounced=true; tutorial(3); }
     } else if(next.id === "tube"){
       els.notice.textContent = "Pneumatic eternity transfer authorised. Stand clear.";
       setTimeout(finish, 1800);
@@ -782,6 +832,7 @@
 
     addPop(515,340,`+${state.manualValue}`);
     state.officePulse = 1;
+    if(state.tutorialStep === 0) tutorial(1);
     updateUI();
   }
 
@@ -1069,7 +1120,7 @@
     const dt = Math.min(.05,(now-state.lastFrame)/1000);
     state.lastFrame=now;
 
-    if(!state.finished){
+    if(!state.finished && state.shiftStarted){
       state.authority += effectivePassive() * dt;
       updateSouls(dt);
       updateWorkers(dt);
@@ -1088,6 +1139,14 @@
   els.processBtn.addEventListener("click", manualProcess);
   els.buyBtn.addEventListener("click", buyMilestone);
   els.restartBtn.addEventListener("click", () => location.reload());
+  els.startShiftBtn.addEventListener("click", () => {
+    state.shiftStarted=true;
+    state.startedAt=performance.now();
+    state.lastFrame=performance.now();
+    els.onboardingOverlay.classList.add("hidden");
+    setGoal("GOAL: Process your first soul.");
+    els.processBtn.classList.add("guided-pulse");
+  });
 
   for(let i=0;i<3;i++) addSoul();
   seedWorkers();

@@ -42,7 +42,8 @@
         <section class="paper action-card">
           <div class="paper-label">CURRENT DUTY</div>
           <h2 id="dutyTitle">Process the waiting souls</h2>
-          <p id="dutyText">Click repeatedly to stamp cases and earn Authority. The office will start automating itself shortly.</p>
+          <p id="dutyText">Click the button below to process your first soul and earn Authority.</p>
+          <div id="goalPrompt" class="goal-prompt">GOAL: Process your first soul.</div>
 
           <button id="processBtn" class="process-btn" type="button">
             PROCESS NEXT SOUL
@@ -133,7 +134,18 @@
     </main>
   </div>
 
-  <div id="endScreen" class="end-screen hidden">
+  
+  <div id="onboardingOverlay" class="onboarding-overlay">
+    <div class="onboarding-card">
+      <div class="paper-label">FIRST SHIFT BRIEFING</div>
+      <h2>Build an automated soul-processing office.</h2>
+      <p>Start by processing souls yourself. Use Authority to buy staff and equipment, then optimise the office so it runs without you.</p>
+      <div class="onboarding-flow"><span>PROCESS</span><b>→</b><span>EARN</span><b>→</b><span>BUY</span><b>→</b><span>AUTOMATE</span><b>→</b><span>OPTIMISE</span></div>
+      <button id="startShiftBtn" type="button">START FIRST SHIFT</button>
+    </div>
+  </div>
+
+<div id="endScreen" class="end-screen hidden">
     <div class="end-paper">
       <div class="paper-label">FORM 42-Z · PROTOTYPE COMPLETE</div>
       <h2>The Soul Tube is operational.</h2>

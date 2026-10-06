@@ -87,3 +87,10 @@ This version adds three player-agency systems:
 - **Filing Cabinet placement** — choose among three cabinet locations with different walking/throughput effects.
 
 These are deliberately small choices so the game stays a five-minute prototype rather than becoming a full management sim.
+
+
+## v4 onboarding pass
+- First-shift briefing explains Process → Earn → Buy → Automate → Optimise.
+- First action and first upgrade are explicitly guided.
+- Once automation starts, the main button becomes optional help rather than the implied core loop.
+- The game then points players toward bottlenecks and worker management.
