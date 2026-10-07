@@ -94,3 +94,20 @@ These are deliberately small choices so the game stays a five-minute prototype r
 - First action and first upgrade are explicitly guided.
 - Once automation starts, the main button becomes optional help rather than the implied core loop.
 - The game then points players toward bottlenecks and worker management.
+
+
+## v5 themed visual overhaul
+Approved mockup direction applied: dark framed UI, warm office palette, teal spectral glow, richer props, tiny office workers, posters, plants, floor branding and a much chunkier Soul Tube.
+
+
+## v6 reference-match visual polish
+
+- Uses the approved Department 42 header artwork from the reference screenshot.
+- Enlarges and centralises the Department 42 floor emblem.
+- Reworks the right rail into a cork bulletin board with pinned-paper / Post-it style surfaces.
+- Reduces the rigid stacked-panel feel while preserving the same gameplay and controls.
+
+
+## v7 share polish
+- Moved PROCESSING labels above the processing desks.
+- Clerks now stop in front of desks instead of walking through/standing on the furniture.
