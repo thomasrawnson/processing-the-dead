@@ -47,6 +47,9 @@ node economy-test.mjs
 ```
 
 This checks two representative upgrade paths using a baseline of about one deliberate manual action per second.
+It preserves the existing pacing and affordability-gap checks, and also verifies that milestone times strictly increase and each purchase leaves a finite, nonnegative Authority balance below one simulation tick of income (with a small floating-point tolerance).
+
+Passing this deterministic smoke test does not replace the required manual browser and gameplay review.
 
 ## Playtest recommendation
 

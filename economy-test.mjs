@@ -1,3 +1,7 @@
+import assert from "node:assert/strict";
+
+const tickSeconds = .05;
+const epsilon = 1e-9;
 
 const paths = {
   stamp_junior_runner: [
@@ -23,16 +27,17 @@ function simulate(path, clicksPerSecond=1){
   const result=[];
 
   for(const step of path){
+    const incomePerTick = (manual*clicksPerSecond + passive) * tickSeconds;
     while(authority < step.cost){
-      authority += (manual*clicksPerSecond + passive) * .05;
-      t += .05;
+      authority += incomePerTick;
+      t += tickSeconds;
       if(t>1000) throw new Error("simulation runaway");
     }
     const gap=t-previous;
     authority -= step.cost;
     manual=step.manual;
     passive=step.passive;
-    result.push({name:step.name,t,gap,manual,passive});
+    result.push({name:step.name,t,gap,manual,passive,authority,incomePerTick});
     previous=t;
   }
   return result;
@@ -43,6 +48,17 @@ for(const [name,path] of Object.entries(paths)){
   console.log(`\n${name}`);
   for(const r of result){
     console.log(`${r.name.padEnd(20)} ${r.t.toFixed(1).padStart(6)}s   gap ${r.gap.toFixed(1).padStart(5)}s`);
+  }
+  let previousTime = 0;
+  for(const r of result){
+    assert.ok(Number.isFinite(r.t) && r.t > previousTime,
+      `${name}: ${r.name} milestone time must strictly increase`);
+    // Buying as soon as affordable must leave less than one tick of income.
+    // Use the pre-purchase rate: the new upgrade only affects future earnings.
+    assert.ok(Number.isFinite(r.authority) && r.authority >= 0 &&
+      r.authority < r.incomePerTick + epsilon,
+      `${name}: ${r.name} post-purchase Authority ${r.authority} must be within [0, ${r.incomePerTick}) (tolerance ${epsilon})`);
+    previousTime = r.t;
   }
   const tube=result[result.length-1];
   if(tube.t < 210 || tube.t > 330){
