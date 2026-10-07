@@ -111,3 +111,12 @@ Approved mockup direction applied: dark framed UI, warm office palette, teal spe
 ## v7 share polish
 - Moved PROCESSING labels above the processing desks.
 - Clerks now stop in front of desks instead of walking through/standing on the furniture.
+
+
+## v8 mobile layout fix
+- Office always appears before the side controls on phones/tablets.
+- Canvas scales to the available screen width.
+- Bulletin-board panels stack underneath the office.
+- Header stats collapse to a 2x2 mobile grid.
+- Pinned-paper rotations are removed on mobile for readability.
+- Touch controls and clerk-role selectors are larger.
